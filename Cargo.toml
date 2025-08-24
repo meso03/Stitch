@@ -1,0 +1,16 @@
+[package]
+name = "stitch_py"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.25", features = ["extension-module"] }
+clap = { version = "3.1.0", features = ["derive"]}
+synthestitch = { path = "../synthestitch" }
+shlex = "1.3"
+
+[patch.crates-io]
+lambdas = { git = "https://github.com/mlb2251/lambdas", rev = "b8d4868fb2c7a132b43a84292d7d3271d8ad3d43" }
