@@ -9,8 +9,11 @@ crate-type = ["cdylib"]
 [dependencies]
 pyo3 = { version = "0.25", features = ["extension-module"] }
 clap = { version = "3.1.0", features = ["derive"]}
-synthestitch = { path = "../synthestitch" }
+lambdas = { path = "../lambdas", features = ["python"]}
+synthestitch = { path = "../synthestitch"}
 shlex = "1.3"
+once_cell = "1.21.3"
 
 [patch.crates-io]
-lambdas = { git = "https://github.com/mlb2251/lambdas", rev = "b8d4868fb2c7a132b43a84292d7d3271d8ad3d43" }
+# lambdas = { git = "https://github.com/mlb2251/lambdas", rev = "b8d4868fb2c7a132b43a84292d7d3271d8ad3d43" }
+lambdas = { path = "../lambdas"}

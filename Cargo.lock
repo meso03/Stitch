@@ -171,9 +171,9 @@ checksum = "4a5f13b858c8d314ee3e8f639011f7ccefe71f97f96e50151fb991f267928e2c"
 [[package]]
 name = "lambdas"
 version = "0.2.0"
-source = "git+https://github.com/mlb2251/lambdas?rev=b8d4868fb2c7a132b43a84292d7d3271d8ad3d43#b8d4868fb2c7a132b43a84292d7d3271d8ad3d43"
 dependencies = [
  "once_cell",
+ "pyo3",
  "rustc-hash",
  "serde",
  "serde_json",
@@ -478,6 +478,8 @@ name = "stitch_py"
 version = "0.1.0"
 dependencies = [
  "clap",
+ "lambdas",
+ "once_cell",
  "pyo3",
  "shlex",
  "synthestitch",
