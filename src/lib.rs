@@ -1,70 +1,31 @@
-// use lambdas::python_bridge::set_current_symbol;
-// use pyo3::prelude::*;
-// use pyo3::types::{PyAny, PyDict, PyTuple};
-// use std::collections::HashMap;
-// use pyo3::wrap_pyfunction;
-// use std::sync::Mutex;
-// use once_cell::sync::OnceCell;
-// use clap::Parser;
-// use synthestitch;
-// use shlex;
-
-// #[pyfunction]
-// fn ping() -> PyResult<&'static str> { Ok("ready") }
-
-// #[pyfunction]
-// fn register_callable(symbol: String, func: Bound<PyAny>) -> PyResult<()> {
-//     lambdas::python_bridge::register_callable(symbol, &func)
-// }
-
-// #[pyfunction]
-// fn register_primitive(symbol: String, tp: String, registry_name: String) -> PyResult<()> {
-//     set_current_symbol(&symbol);
-//     lambdas::python_bridge::register_primitive(symbol, tp, registry_name)
-// }
-
-
-// #[pyfunction]
-// fn run_top_down_cli(args: String, py: Python<'_>) -> PyResult<String> {
-//     let toks = shlex::split(&args).ok_or_else(|| pyo3::exceptions::PyValueError::new_err("failed to parse args"))?;
-//     let mut argv = vec!["top_down_py".to_string()];
-//     argv.extend(toks);
-//     let cfg = synthestitch::Args::try_parse_from(&argv)
-//         .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
-
-//     let json = py.allow_threads(|| synthestitch::dispatch_domain(&cfg));
-//     Ok(json)
-// }
-
-
 // stitch_py/src/lib.rs
 
 // use lambdas::python_bridge;
 use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyDict, PyTuple};
-use std::collections::HashMap;
-use pyo3::wrap_pyfunction;
-use std::sync::Mutex;
-use once_cell::sync::OnceCell;
+// use std::collections::HashMap;
+// use pyo3::wrap_pyfunction;
+// use std::sync::Mutex;
+// use once_cell::sync::OnceCell;
 use clap::Parser;
 use synthestitch;
 use shlex;
 use lambdas::{DSL, Symbol, SlowType};
 use lambdas::domains::simple::SimpleVal;
 use lambdas::Domain;
-
+use lambdas::domains::py::PyVal;
 
 // This is a handle, it owns its own registry of primitives
 #[pyclass]
 pub struct StitchHandle {
-    dsl: DSL<SimpleVal>,   // per-instance DSL (no globals)
+    dsl: DSL<PyVal>,   // per-instance DSL (no globals)
 }
 
 #[pymethods]
 impl StitchHandle {
         #[new]
         fn new() -> Self {
-            Self { dsl: SimpleVal::new_dsl() }   // build the native DSL for Simple domain
+            Self { dsl: PyVal::new_dsl() }   // build the native DSL for Simple domain
         }
 
         /// Early-capture registration:
@@ -94,7 +55,13 @@ impl StitchHandle {
         let cfg = synthestitch::Args::try_parse_from(&argv)
             .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
 
-        let json = py.allow_threads(|| synthestitch::dispatch_domain_simple(&cfg, &self.dsl));
+        let dsl = match cfg.domain {
+            synthestitch::DomainChoice::Simple => None,
+            synthestitch::DomainChoice::List => None,
+            synthestitch::DomainChoice::Python => Some(&self.dsl)
+        };
+
+        let json = py.allow_threads(|| synthestitch::dispatch_domain(&cfg, dsl));
         Ok(json)
         }
     }
@@ -107,15 +74,12 @@ impl StitchHandle {
 //     let cfg = synthestitch::Args::try_parse_from(&argv)
 //         .map_err(|e| pyo3::exceptions::PyValueError::new_err(e.to_string()))?;
 
-//     let json = py.allow_threads(|| synthestitch::dispatch_domain(&cfg));
+//     let json = py.allow_threads(|| synthestitch::dispatch_domain(&cfg, None));
 //     Ok(json)
 // }
 
 #[pymodule]
 fn stitch_py(_py: Python, m: &Bound<PyModule>) -> PyResult<()> {
-    // m.add_function(wrap_pyfunction!(ping, m)?)?;
-    // m.add_function(wrap_pyfunction!(register_callable, m)?)?;
-    // m.add_function(wrap_pyfunction!(register_primitive, m)?)?;
     m.add_class::<StitchHandle>()?;
     //m.add_function(wrap_pyfunction!(run_top_down_cli, m)?)?;
     //m.add_function(wrap_pyfunction!(run_cli, m)?)?;
