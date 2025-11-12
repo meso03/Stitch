@@ -3,7 +3,7 @@ from stitch_py import StitchHandle
 
 args = (
     '--file "C:\\Users\\mesom\\OneDrive\\backup\\Documents\\UROP\\synthestitch\\data\\origami\\bigram_test.json" '
-    '--domain list '
+    '--domain python '
     '--model bigram '
     '--bigrams-path "C:\\Users\\mesom\\OneDrive\\backup\\Documents\\UROP\\synthestitch\\data\\origami\\sample_probabilities.json" '
     # '--verbose-eval '
